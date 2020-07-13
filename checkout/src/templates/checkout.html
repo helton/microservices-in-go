@@ -15,7 +15,7 @@
         <h2>Product: {{.Product}}</h2>
         <h3>Price: R$ {{.Price}}</h3>
 
-        <form action="/finish">
+        <form action="/finish" method="post">
             <input type="hidden" name="product_id" value="{{.Uuid}}">
             Name: <input type="text" name="name"><br>
             E-mail: <input type="text" name="email"><br>

@@ -39,3 +39,35 @@ func Notify(payload []byte, exchange string, routingKey string, ch *amqp.Channel
 
 	fmt.Println("Message sent")
 }
+
+func StartConsuming(ch *amqp.Channel, in chan []byte) {
+	queue, err := ch.QueueDeclare(
+		os.Getenv("RABBITMQ_CONSUMER_QUEUE"),
+		true,
+		false,
+		false,
+		false,
+		nil)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	messages, err := ch.Consume(queue.Name,
+		"checkout",
+		true,
+		false,
+		false,
+		false,
+		nil)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	go func() {
+		for m := range messages {
+			in <- m.Body
+		}
+	}()
+}

@@ -60,7 +60,7 @@ func finish(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(string(data))
 
 	connection := queue.Connect()
-	queue.Notify(data, "checkout_ex", "", connection)
+	queue.Notify(data, os.Getenv("RABBITMQ_CONSUMER_EXCHANGE"), "", connection)
 
 	w.Write([]byte("Processed"))
 }

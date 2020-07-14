@@ -3,7 +3,6 @@ package main
 import (
 	"checkout/queue"
 	"encoding/json"
-	"fmt"
 	"github.com/gorilla/mux"
 	"html/template"
 	"io/ioutil"
@@ -57,10 +56,10 @@ func finish(w http.ResponseWriter, r *http.Request) {
 	order.ProductId = r.FormValue("product_id")
 
 	data, _ := json.Marshal(order)
-	fmt.Println(string(data))
 
 	connection := queue.Connect()
-	queue.Notify(data, os.Getenv("RABBITMQ_CONSUMER_EXCHANGE"), "", connection)
+	queue.Notify(data, os.Getenv("RABBITMQ_CHECKOUT_EXCHANGE"), "", connection)
+	log.Println("Checkout message sent: ", string(data))
 
 	w.Write([]byte("Processed"))
 }

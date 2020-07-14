@@ -1,7 +1,6 @@
 package queue
 
 import (
-	"fmt"
 	"github.com/streadway/amqp"
 	"os"
 )
@@ -36,6 +35,4 @@ func Notify(payload []byte, exchange string, routingKey string, ch *amqp.Channel
 	if err != nil {
 		panic(err.Error())
 	}
-
-	fmt.Println("Message sent")
 }

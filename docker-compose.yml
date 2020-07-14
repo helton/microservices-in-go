@@ -48,17 +48,44 @@ services:
       RABBITMQ_DEFAULT_HOST: rabbitmq
       RABBITMQ_DEFAULT_PORT: 5672
       RABBITMQ_DEFAULT_VHOST: /
-      RABBITMQ_CONSUMER_EXCHANGE: checkout_exchange
+      RABBITMQ_CHECKOUT_EXCHANGE: checkout_exchange
 
-  order:
+  order_checkout:
     build:
       context: ./order
     environment:
-      PRODUCTS_URL: http://product:8081
+      ORDER_QUEUE: checkout
       RABBITMQ_DEFAULT_USER: rabbitmq-user
       RABBITMQ_DEFAULT_PASS: rabbitmq-pass
       RABBITMQ_DEFAULT_HOST: rabbitmq
       RABBITMQ_DEFAULT_PORT: 5672
       RABBITMQ_DEFAULT_VHOST: /
-      RABBITMQ_CONSUMER_QUEUE: checkout_queue
+      RABBITMQ_CHECKOUT_QUEUE: checkout_queue
+      RABBITMQ_ORDER_EXCHANGE: order_exchange
+      REDIS_HOST: redis:6379
+
+  order_payment:
+    build:
+      context: ./order
+    environment:
+      ORDER_QUEUE: payment
+      RABBITMQ_DEFAULT_USER: rabbitmq-user
+      RABBITMQ_DEFAULT_PASS: rabbitmq-pass
+      RABBITMQ_DEFAULT_HOST: rabbitmq
+      RABBITMQ_DEFAULT_PORT: 5672
+      RABBITMQ_DEFAULT_VHOST: /
+      RABBITMQ_PAYMENT_QUEUE: payment_queue
+      REDIS_HOST: redis:6379
+
+  payment:
+    build:
+      context: ./payment
+    environment:
+      RABBITMQ_DEFAULT_USER: rabbitmq-user
+      RABBITMQ_DEFAULT_PASS: rabbitmq-pass
+      RABBITMQ_DEFAULT_HOST: rabbitmq
+      RABBITMQ_DEFAULT_PORT: 5672
+      RABBITMQ_DEFAULT_VHOST: /
+      RABBITMQ_ORDER_QUEUE: order_queue
+      RABBITMQ_PAYMENT_EXCHANGE: payment_exchange
       REDIS_HOST: redis:6379

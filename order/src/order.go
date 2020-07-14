@@ -2,10 +2,13 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
+	"flag"
 	"github.com/nu7hatch/gouuid"
+	"github.com/streadway/amqp"
+	"log"
 	"order/db"
 	"order/queue"
+	"os"
 	"time"
 )
 
@@ -25,7 +28,7 @@ type Order struct {
 	CreatedAt time.Time `json:"created_at,string"`
 }
 
-func createOrder(payload []byte) {
+func createOrder(payload []byte) Order {
 	var order Order
 	json.Unmarshal(payload, &order)
 
@@ -34,6 +37,8 @@ func createOrder(payload []byte) {
 	order.Status = "pending"
 	order.CreatedAt = time.Now()
 	saveOrder(order)
+
+	return order
 }
 
 func saveOrder(order Order) {
@@ -44,16 +49,43 @@ func saveOrder(order Order) {
 		panic(err.Error())
 	}
 
-	fmt.Printf("Order %s saved!\n", order.Uuid)
+	log.Println("Order saved/updated: ", string(json))
+}
+
+func notifyOrderCreated(order Order, ch *amqp.Channel) {
+	json, _ := json.Marshal(order)
+	queue.Notify(json, os.Getenv("RABBITMQ_ORDER_EXCHANGE"), "", ch)
+	log.Println("Order created: ", string(json))
 }
 
 func main() {
+	var param string
+
+	flag.StringVar(&param, "opt", "", "Usage")
+	flag.Parse()
+
 	in := make(chan []byte)
-
 	connection := queue.Connect()
-	queue.StartConsuming(connection, in)
 
-	for payload := range in {
-		createOrder(payload)
+	switch param {
+	case "checkout":
+		log.Println("Consuming checkout queue...")
+
+		queue.StartConsuming(os.Getenv("RABBITMQ_CHECKOUT_QUEUE"), connection, in)
+		for payload := range in {
+			order := createOrder(payload)
+			notifyOrderCreated(order, connection)
+		}
+	case "payment":
+		log.Println("Consuming payment queue...")
+
+		queue.StartConsuming(os.Getenv("RABBITMQ_PAYMENT_QUEUE"), connection, in)
+		var order Order
+		for payload := range in {
+			json.Unmarshal(payload, &order)
+			saveOrder(order)
+			log.Println("Order payment status updated: ", string(payload))
+		}
 	}
+
 }

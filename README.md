@@ -48,3 +48,7 @@ nc -v localhost 6379
 KEYS *
 GET eba1fd9a-439b-4d20-60ff-2b6aac87a18c
 ```
+
+## Todo
+
+- [ ] Create `Dockerfile` for Redis to create a custom image the exchanges and queues definitions

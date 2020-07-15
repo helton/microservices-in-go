@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-checkout
+spec:
+  selector:
+    matchLabels:
+      app: order-checkout
+
+  template:
+    metadata:
+      labels:
+        app: order-checkout
+    spec:
+      containers:
+        - name: order-checkout
+          image: h3170n/microservices-in-go-order
+          ports:
+            - containerPort: 6572
+          env:
+            - name: ORDER_QUEUE
+              value: "checkout"
+            - name: RABBITMQ_DEFAULT_USER
+              value: "rabbitmq-user"
+            - name: RABBITMQ_DEFAULT_PASS
+              value: "rabbitmq-pass"
+            - name: RABBITMQ_DEFAULT_HOST
+              value: "rabbitmq-service"
+            - name: RABBITMQ_DEFAULT_PORT
+              value: "5672"
+            - name: RABBITMQ_DEFAULT_VHOST
+              value: "/"
+            - name: RABBITMQ_CHECKOUT_QUEUE
+              value: "checkout_queue"
+            - name: RABBITMQ_ORDER_EXCHANGE
+              value: "order_exchange"
+            - name: REDIS_HOST
+              value: "redis-service:6379"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-checkout-service
+  labels:
+    app: order-checkout-service
+spec:
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 6572
+  selector:
+    app: order-checkout

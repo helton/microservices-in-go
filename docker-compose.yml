@@ -19,16 +19,14 @@ services:
       - 6379:6379
 
   product:
-    build:
-      context: ./product
+    image: h3170n/microservices-in-go-product
     ports:
       - 8081:8081
     environment:
       SERVICE_PORT: :8081
 
   catalog:
-    build:
-      context: ./catalog
+    image: h3170n/microservices-in-go-catalog
     ports:
       - 8082:8082
     environment:
@@ -36,8 +34,7 @@ services:
       PRODUCTS_URL: http://product:8081
 
   checkout:
-    build:
-      context: ./checkout
+    image: h3170n/microservices-in-go-checkout
     ports:
       - 8083:8083
     environment:
@@ -51,8 +48,7 @@ services:
       RABBITMQ_CHECKOUT_EXCHANGE: checkout_exchange
 
   order_checkout:
-    build:
-      context: ./order
+    image: h3170n/microservices-in-go-order
     environment:
       ORDER_QUEUE: checkout
       RABBITMQ_DEFAULT_USER: rabbitmq-user
@@ -65,8 +61,7 @@ services:
       REDIS_HOST: redis:6379
 
   order_payment:
-    build:
-      context: ./order
+    image: h3170n/microservices-in-go-order
     environment:
       ORDER_QUEUE: payment
       RABBITMQ_DEFAULT_USER: rabbitmq-user
@@ -78,8 +73,7 @@ services:
       REDIS_HOST: redis:6379
 
   payment:
-    build:
-      context: ./payment
+    image: h3170n/microservices-in-go-payment
     environment:
       RABBITMQ_DEFAULT_USER: rabbitmq-user
       RABBITMQ_DEFAULT_PASS: rabbitmq-pass

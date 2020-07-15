@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: checkout
+spec:
+  selector:
+    matchLabels:
+      app: checkout
+
+  template:
+    metadata:
+      labels:
+        app: checkout
+    spec:
+      containers:
+        - name: checkout
+          image: h3170n/microservices-in-go-checkout
+          ports:
+            - containerPort: 8083
+          env:
+            - name: SERVICE_PORT
+              value: ":8083"
+            - name: PRODUCTS_URL
+              value: "http://product-service:8081"
+            - name: RABBITMQ_DEFAULT_USER
+              value: "rabbitmq-user"
+            - name: RABBITMQ_DEFAULT_PASS
+              value: "rabbitmq-pass"
+            - name: RABBITMQ_DEFAULT_HOST
+              value: "rabbitmq-service"
+            - name: RABBITMQ_DEFAULT_PORT
+              value: "5672"
+            - name: RABBITMQ_DEFAULT_VHOST
+              value: "/"
+            - name: RABBITMQ_CHECKOUT_EXCHANGE
+              value: "checkout_exchange"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: checkout-service
+  labels:
+    app: checkout-service
+spec:
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 8083
+  selector:
+    app: checkout

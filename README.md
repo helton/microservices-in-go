@@ -14,7 +14,8 @@ docker-compose up -d --build
 - `catalog`: serves web pages retrieving data from the `product` service
 - `product`: stores and retrieves products
 - `checkout`: creates orders and send them to a queue (using RabbitMQ) to be processed
-- `order`: processes the order from the queue (using RabbitMQ) and save it to the database (currently on Redis) 
+- `order`: processes the order from the queue (using RabbitMQ) and save it to the database (currently on Redis). It also updates the saved order when the payment status was updated (notified from queue)
+- `payment`: process the order payment and notify via queue
 
 ## Flow
 
@@ -51,4 +52,4 @@ GET eba1fd9a-439b-4d20-60ff-2b6aac87a18c
 
 ## Todo
 
-- [ ] Create `Dockerfile` for Redis to create a custom image the exchanges and queues definitions
+- [ ] Create `Dockerfile` for Redis to create a custom image with the exchanges and queues definitions
